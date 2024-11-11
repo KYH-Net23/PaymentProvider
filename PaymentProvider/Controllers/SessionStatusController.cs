@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PaymentProvider.Models;
 using Stripe.Checkout;
 
 namespace PaymentProvider.Controllers
@@ -12,6 +13,7 @@ namespace PaymentProvider.Controllers
         [HttpGet]
         public ActionResult SessionStatus([FromQuery] string session_id)
         {
+
             try
             {
                 var sessionService = new SessionService();

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using PaymentProvider.Models;
 using Stripe;
+using Stripe.Checkout;
+using Stripe.Forwarding;
 
 namespace PaymentProvider.Controllers
 {
@@ -15,6 +17,7 @@ namespace PaymentProvider.Controllers
         {
             try
             {
+
                 var options = new PaymentIntentCreateOptions
                 {
                     Amount = (long)paymentRequest.TotalAmount,
