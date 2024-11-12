@@ -49,7 +49,7 @@ namespace PaymentProvider.Controllers
                     LineItems = lineItems,
                     Mode = "payment",
                     ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
-                    CustomerEmail = "begem96629@gianes.com"
+                    CustomerEmail = order.EmailAddress,
                 };
                 var service = new SessionService();
                 var session = service.Create(options);
