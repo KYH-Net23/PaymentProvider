@@ -1,4 +1,5 @@
 using Azure.Identity;
+using PaymentProvider.Services;
 using Stripe;
 
 namespace PaymentProvider
@@ -9,6 +10,8 @@ namespace PaymentProvider
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddHttpClient();
+            builder.Services.AddScoped<OrderService>();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
