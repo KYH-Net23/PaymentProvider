@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Stripe;
 
 namespace PaymentProvider
 {
@@ -7,28 +9,38 @@ namespace PaymentProvider
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            var vaultUri = new Uri($"{builder.Configuration["KeyVault"]!}");
+
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Configuration.AddAzureKeyVault(vaultUri, new VisualStudioCredential());
+            }
+            else if (builder.Environment.IsProduction())
+            {
+                builder.Configuration.AddAzureKeyVault(vaultUri, new DefaultAzureCredential());
+            }
+            StripeConfiguration.ApiKey = builder.Configuration["StripeSecret"];
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseDeveloperExceptionPage();
             }
-
+            app.UseCors(x => x.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
             app.UseHttpsRedirection();
-
+            app.UseRouting();
             app.UseAuthorization();
+            app.UseStaticFiles();
+            app.UseEndpoints(e => e.MapControllers());
 
-
-            app.MapControllers();
+            //app.MapControllers();
 
             app.Run();
         }
