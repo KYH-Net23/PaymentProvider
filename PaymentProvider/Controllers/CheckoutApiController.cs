@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using PaymentProvider.Converters;
 using PaymentProvider.Models;
+using PaymentProvider.Services;
 using Stripe;
 using Stripe.Checkout;
 
@@ -8,57 +11,47 @@ namespace PaymentProvider.Controllers
 {
     [Route("create-checkout-session")]
     [ApiController]
-    public class CheckoutApiController : ControllerBase
+    public class CheckoutApiController(HttpClient client) : ControllerBase
     {
+        private readonly HttpClient _client = client;
+
         // api to get customer information and order details
         // retrieve Price ID from order details - find way to not have to use price id?
 
         [HttpPost]
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
             try
             {
-                var products = new List<ProductModel>()
+                var response = await _client.GetAsync($"https://localhost:7127/api/Order/1");
+                var order = new OrderDetails();
+                if (response.IsSuccessStatusCode)
                 {
-                    new ProductModel { Id = 1, Model = "T-Shirt", Price = 1000, Quantity = 2 },
-                    new ProductModel { Id = 2, Model = "Pants", Price = 2000, Quantity = 1 }
-                };
-                var order = new OrderDetails { Id = 1, Products = products };
-                var lineItems = new List<SessionLineItemOptions>();
-                foreach (var product in products)
-                {
-                    order.TotalAmount += product.Price * product.Quantity;
-                    lineItems.Add(new SessionLineItemOptions
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            Currency = "sek",
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = product.Model
-                            },
-                            UnitAmount = (long)product.Price
-                        },
-                        Quantity = product.Quantity
-                    });
+                    var settings = new JsonSerializerSettings();
+                    settings.Converters.Add(new SessionLineItemOptionsConverter());
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    order = JsonConvert.DeserializeObject<OrderDetails>(jsonResponse, settings);
+                    if (order == null) return BadRequest(jsonResponse);
                 }
                 var domain = "http://localhost:5173";
                 var options = new SessionCreateOptions
                 {
                     UiMode = "embedded",
-                    LineItems = lineItems,
+                    Currency = "sek",
+                    LineItems = order.OrderItemList,
                     Mode = "payment",
                     ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
-                    CustomerEmail = "begem96629@gianes.com"
+                    CustomerEmail = order!.EmailAddress,
                 };
                 var service = new SessionService();
                 var session = service.Create(options);
 
                 return Ok(new { clientSecret = session.ClientSecret });
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest();
+                Console.WriteLine(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
     }
