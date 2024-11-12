@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PaymentProvider.Models;
+using PaymentProvider.Services;
 using Stripe.Checkout;
 
 namespace PaymentProvider.Controllers
@@ -9,6 +10,12 @@ namespace PaymentProvider.Controllers
     [ApiController]
     public class SessionStatusController : ControllerBase
     {
+        private readonly EmailService _emailService;
+
+        public SessionStatusController(EmailService emailService)
+        {
+            _emailService = emailService;
+        }
 
         [HttpGet]
         public ActionResult SessionStatus([FromQuery] string session_id)
@@ -18,6 +25,8 @@ namespace PaymentProvider.Controllers
             {
                 var sessionService = new SessionService();
                 var session = sessionService.Get(session_id);
+
+                _emailService.SendEmail(session.CustomerEmail, "Test", "Test", "Test");
 
                 return Ok(new
                 {
