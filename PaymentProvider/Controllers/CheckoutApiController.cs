@@ -42,12 +42,11 @@ namespace PaymentProvider.Controllers
                         Quantity = product.Quantity
                     });
                 }
-                var domain = "http://localhost:3000";
+                var domain = "http://localhost:5173";
                 var options = new SessionCreateOptions
                 {
                     UiMode = "embedded",
                     LineItems = lineItems,
-                    PaymentMethodTypes = ["card"],
                     Mode = "payment",
                     ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
                     CustomerEmail = "begem96629@gianes.com"

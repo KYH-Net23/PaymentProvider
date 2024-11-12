@@ -1,4 +1,4 @@
-
+using Azure.Identity;
 using Stripe;
 
 namespace PaymentProvider
@@ -9,10 +9,21 @@ namespace PaymentProvider
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            var vaultUri = new Uri($"{builder.Configuration["KeyVault"]!}");
+
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Configuration.AddAzureKeyVault(vaultUri, new VisualStudioCredential());
+            }
+            else if (builder.Environment.IsProduction())
+            {
+                builder.Configuration.AddAzureKeyVault(vaultUri, new DefaultAzureCredential());
+            }
+            StripeConfiguration.ApiKey = builder.Configuration["StripeSecret"];
 
             var app = builder.Build();
 
