@@ -12,7 +12,7 @@ namespace PaymentProvider.Services
             new ProductModel { Id = 1, Model = "T-Shirt", Price = 1000, Quantity = 2 },
             new ProductModel { Id = 2, Model = "Pants", Price = 2000, Quantity = 1 }
         ];
-        public async Task<OrderDetails?> GetOrderDetailsAsync(int id)
+        public OrderDetails? GetOrderDetails(int id)
         {
             if (id == 1)
             {

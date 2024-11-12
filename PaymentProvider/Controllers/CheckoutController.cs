@@ -11,19 +11,19 @@ namespace PaymentProvider.Controllers
 {
     [Route("create-checkout-session")]
     [ApiController]
-    public class CheckoutApiController(HttpClient client) : ControllerBase
+    public class CheckoutController(HttpClient client) : ControllerBase
     {
         private readonly HttpClient _client = client;
 
         // api to get customer information and order details
         // retrieve Price ID from order details - find way to not have to use price id?
 
-        [HttpPost]
-        public async Task<ActionResult> Create()
+        [HttpPost("{orderId}")]
+        public async Task<ActionResult> Create(int orderId)
         {
             try
             {
-                var response = await _client.GetAsync($"https://localhost:7127/api/Order/1");
+                var response = await _client.GetAsync($"https://localhost:7127/api/Order/{orderId}");
                 var order = new OrderDetails();
                 if (response.IsSuccessStatusCode)
                 {
@@ -45,7 +45,6 @@ namespace PaymentProvider.Controllers
                 };
                 var service = new SessionService();
                 var session = service.Create(options);
-
                 return Ok(new { clientSecret = session.ClientSecret });
             }
             catch (Exception ex)

@@ -18,7 +18,7 @@ namespace PaymentProvider.Controllers
         }
 
         [HttpGet]
-        public ActionResult SessionStatus([FromQuery] string session_id)
+        public async Task<ActionResult> SessionStatus([FromQuery] string session_id)
         {
 
             try
@@ -26,7 +26,7 @@ namespace PaymentProvider.Controllers
                 var sessionService = new SessionService();
                 var session = sessionService.Get(session_id);
 
-                _emailService.SendEmail(session.CustomerEmail, "Test", "Test", "Test");
+                await _emailService.SendEmailAsync(session.CustomerEmail, session, new OrderDetails { Id = 1 });
 
                 return Ok(new
                 {
