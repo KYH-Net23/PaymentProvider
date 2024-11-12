@@ -12,6 +12,7 @@ namespace PaymentProvider
 
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<OrderService>();
+            builder.Services.AddScoped<EmailService>();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
