@@ -21,6 +21,7 @@ namespace PaymentProvider.Services
                     Id = 1,
                     EmailAddress = "xahit81459@anypng.com",
                     Products = _products,
+                    Address = "Norgegatan 2, 164 90"
                 };
                 order.OrderItemList = GetOrderItemsList(order);
                 return order;

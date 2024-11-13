@@ -6,16 +6,10 @@ using Stripe.Checkout;
 
 namespace PaymentProvider.Services
 {
-    public class EmailService
+    public class EmailService(EmailSessionRepository sessionRepository, string connectionString)
     {
-        private readonly EmailClient _emailClient;
-        private readonly EmailSessionRepository _sessionRepository;
-
-        public EmailService(EmailSessionRepository sessionRepository, string connectionString)
-        {
-            _emailClient = new EmailClient(connectionString);
-            _sessionRepository = sessionRepository;
-        }
+        private readonly EmailClient _emailClient = new(connectionString);
+        private readonly EmailSessionRepository _sessionRepository = sessionRepository;
 
         public async Task<bool> IsEmailSent(string sessionId)
         {
@@ -27,7 +21,7 @@ namespace PaymentProvider.Services
             return false;
         }
 
-        public async Task SendEmailAsync(string toAddress, Session session, OrderDetails order)
+        public async Task<bool> SendEmailAsync(string toAddress, Session session, OrderDetails order)
         {
             try
             {
@@ -54,16 +48,18 @@ namespace PaymentProvider.Services
                         plainTextContent: "asd");
                     emailSession.Sent = emailSendOperation.HasCompleted;
                     await _sessionRepository.UpdateAsync(emailSession);
+                    return true;
                 }
                 else
                 {
                     Console.WriteLine("Email has already been sent.");
+                    return false;
                     // handle more logic here?
                 }
             }
             catch
             {
-
+                return false;
             }
         }
     }

@@ -11,41 +11,32 @@ namespace PaymentProvider.Controllers
 {
     [Route("create-checkout-session")]
     [ApiController]
-    public class CheckoutController(HttpClient client) : ControllerBase
+    public class CheckoutController(OrderService orderService) : ControllerBase
     {
-        private readonly HttpClient _client = client;
+        private readonly OrderService _orderService = orderService;
 
         // api to get customer information and order details
-        // retrieve Price ID from order details - find way to not have to use price id?
 
-        [HttpPost("{orderId}")]
-        public async Task<ActionResult> Create(int orderId)
+        [HttpPost]
+        public ActionResult Create([FromBody] OrderDetails orderDetails)
         {
             try
             {
-                var response = await _client.GetAsync($"https://localhost:7127/api/Order/{orderId}");
-                var order = new OrderDetails();
-                if (response.IsSuccessStatusCode)
-                {
-                    var settings = new JsonSerializerSettings();
-                    settings.Converters.Add(new SessionLineItemOptionsConverter());
-                    var jsonResponse = await response.Content.ReadAsStringAsync();
-                    order = JsonConvert.DeserializeObject<OrderDetails>(jsonResponse, settings);
-                    if (order == null) return BadRequest(jsonResponse);
-                }
+                if (orderDetails == null) return NotFound();
+                orderDetails.OrderItemList = _orderService.GetOrderItemsList(orderDetails);
                 var domain = "http://localhost:5173";
                 var options = new SessionCreateOptions
                 {
                     UiMode = "embedded",
                     Currency = "sek",
-                    LineItems = order.OrderItemList,
+                    LineItems = orderDetails.OrderItemList,
                     Mode = "payment",
                     ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
-                    CustomerEmail = order!.EmailAddress,
+                    CustomerEmail = orderDetails!.EmailAddress,
                 };
                 var service = new SessionService();
                 var session = service.Create(options);
-                return Ok(new { clientSecret = session.ClientSecret });
+                return Ok(new { sessionId = session.Id, clientSecret = session.ClientSecret });
             }
             catch (Exception ex)
             {
