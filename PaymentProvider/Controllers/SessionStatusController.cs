@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PaymentProvider.Factories;
 using PaymentProvider.Models;
 using PaymentProvider.Services;
 using Stripe;
@@ -18,33 +19,32 @@ namespace PaymentProvider.Controllers
         {
             try
             {
-
                 var sessionService = new SessionService();
                 var session = sessionService.Get(session_id);
+
                 var sessionLineItemService = new SessionLineItemService();
                 var lineItems = sessionLineItemService.List(session_id);
+
                 var paymentIntentService = new PaymentIntentService();
                 var paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
+
                 var paymentMethodService = new PaymentMethodService();
                 var paymentMethod = paymentMethodService.Get(paymentIntent.PaymentMethodId);
 
                 session.LineItems = lineItems;
+
                 if (session.PaymentStatus == "paid")
                 {
-                    var paymentSession = new PaymentSession
-                    {
-                        Session = session,
-                        OrderId = int.Parse(session.Metadata["orderId"]),
-                        PaymentIntent = paymentIntent,
-                        PaymentMethod = paymentMethod,
-                    };
+                    var paymentSession = PaymentSessionFactory.Create(session, int.Parse(session.Metadata["orderId"]), paymentMethod, paymentIntent);
+
                     var emailTask = await _emailService.SendEmailAsync(session.CustomerEmail, paymentSession);
                     return Ok(new { emailSent = emailTask, status = session.Status });
                 }
                 return BadRequest(new { status = session.Status });
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return BadRequest();
             }
         }
