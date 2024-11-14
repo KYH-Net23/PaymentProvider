@@ -33,6 +33,10 @@ namespace PaymentProvider.Controllers
                     Mode = "payment",
                     ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
                     CustomerEmail = orderDetails!.EmailAddress,
+                    Metadata = new Dictionary<string, string>
+                    {
+                        {"orderId", $"{orderDetails.Id}" }
+                    },
                 };
                 var service = new SessionService();
                 var session = service.Create(options);
