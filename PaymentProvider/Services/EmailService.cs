@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Azure.Communication.Email;
+using PaymentProvider.Factories;
 using PaymentProvider.Models;
 using PaymentProvider.Repositories;
 using Stripe;
@@ -12,13 +13,14 @@ namespace PaymentProvider.Services
         private readonly EmailClient _emailClient = new(connectionString);
         private readonly EmailSessionRepository _sessionRepository = sessionRepository;
         private readonly string _senderAddress = "DoNotReply@e610b531-2626-468a-b39c-ee360d0cb912.azurecomm.net";
+
         public async Task<bool> IsEmailSent(string sessionId)
         {
             var session = await _sessionRepository.GetEmailSessionAsync(sessionId);
+
             if (session != null)
-            {
                 return session.Sent;
-            }
+            
             return false;
         }
 
@@ -27,17 +29,14 @@ namespace PaymentProvider.Services
             try
             {
                 var emailContent = GenerateEmailContent(paymentSession);
+
                 if (string.IsNullOrEmpty(emailContent)) return false;
+
                 var emailSession = await _sessionRepository.GetEmailSessionAsync(paymentSession.Session.Id);
+
                 if (emailSession == null)
-                {
-                    emailSession = new EmailSession
-                    {
-                        OrderId = paymentSession.OrderId,
-                        SessionId = paymentSession.Session.Id,
-                        Sent = false,
-                        Date = DateTime.UtcNow,
-                    };
+                {      
+                    emailSession = EmailSessionFactory.Create(paymentSession.Session.Id, paymentSession.OrderId, false, DateTime.UtcNow);
                     await _sessionRepository.CreateAsync(emailSession);
                 }
                 if (!await IsEmailSent(paymentSession.Session.Id))
@@ -48,7 +47,9 @@ namespace PaymentProvider.Services
                         recipientAddress: toAddress,
                         subject: "Rika - Your payment was successful!",
                         htmlContent: emailContent,
-                        plainTextContent: "");
+                        plainTextContent: ""
+                    );
+
                     emailSession.Sent = emailSendOperation.HasCompleted;
                     await _sessionRepository.UpdateAsync(emailSession);
                     return true;
@@ -57,11 +58,11 @@ namespace PaymentProvider.Services
                 {
                     Console.WriteLine("Email has already been sent.");
                     return false;
-                    // handle more logic here?
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return false;
             }
         }
@@ -69,7 +70,6 @@ namespace PaymentProvider.Services
         {
             try
             {
-
                 var productTableRows = string.Empty;
                 foreach (var product in paymentSession.Session.LineItems.Data)
                 {
@@ -199,9 +199,9 @@ namespace PaymentProvider.Services
                 </html>    
                 ";
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(ex.Message);
                 return null!;
             }
         }

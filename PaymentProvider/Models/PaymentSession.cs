@@ -8,6 +8,7 @@ namespace PaymentProvider.Models
         public Session Session { get; set; } = null!;
         public int OrderId { get; set; }
         public PaymentMethod PaymentMethod { get; set; } = null!;
+
         private string? _paymentMethodInfo;
         public string PaymentMethodInfo
         {
