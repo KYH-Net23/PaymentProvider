@@ -83,8 +83,7 @@ namespace PaymentProvider.Services
                 }
                 return $@"
                 <html>
-                    <body style='font-family: Montserrat, sans-serif;'>
-                       
+                    <body style='font-family: Montserrat, sans-serif;'>  
                         <table role='presentation' style='width: 100%; max-width: 600px; margin: 0 auto; border-spacing: 0;'>
 
                             <tr>
@@ -104,97 +103,95 @@ namespace PaymentProvider.Services
                                 </td>
                             </tr>
 
-                        <tr>
-                            <td>
-                                <h3>Order Information</h3>
+                            <tr>
+                                <td>
+                                    <h3>Order Information</h3>
 
-                                <p>
-                                    Payment date: <strong>{paymentSession.Session.Created.ToString("g")}</strong><br />
-                                    Order number: <strong>{paymentSession.OrderId}</strong><br />
-                                    Payment method: <strong>{paymentSession.PaymentMethod.Type} {paymentSession.PaymentMethodInfo}</strong><br />
-                                    Delivery method: <strong>Some delivery method</strong><br />
-                                </p>
-                            </td>
-                        </tr>
+                                    <p>
+                                        Payment date: <strong>{paymentSession.Session.Created.ToString("g")}</strong><br />
+                                        Order number: <strong>{paymentSession.OrderId}</strong><br />
+                                        Payment method: <strong>{paymentSession.PaymentMethod.Type} {paymentSession.PaymentMethodInfo}</strong><br />
+                                        Delivery method: <strong>Some delivery method</strong><br />
+                                    </p>
+                                </td>
+                            </tr>
+                
+                            <tr>
+                                <td>
+                                    <hr />
+                                </td>
+                            </tr>
 
-                     
-                        <tr>
-                            <td>
-                                <hr />
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>
+                                    <h3>Customer Information</h3>
 
-                        <tr>
-                            <td>
-                                <h3>Customer Information</h3>
+                                    <p>
+                                        {paymentSession.Session.CustomerDetails.Name ?? "Name not available"}<br />
+                                        {paymentSession.Session.CustomerDetails.Address.Line1 ?? "Address not available"}<br />
+                                        {paymentSession.Session.CustomerDetails.Address.PostalCode ?? "Postal code not available"}, {paymentSession.Session.CustomerDetails.Address.City ?? "City not available"}<br />
+                                        {paymentSession.Session.CustomerDetails.Address.Country ?? "Country not available"}<br />
+                                        {paymentSession.Session.CustomerDetails.Phone ?? "Phone number not available"}<br />
+                                        {paymentSession.Session.CustomerEmail ?? "Email not available"}<br />
+                                    </p>
+                                </td>
+                            </tr>
 
-                                <p>
-                                    {paymentSession.Session.CustomerDetails.Name}<br />
-                                    {paymentSession.Session.CustomerDetails.Address.Line1}<br />
-                                    {paymentSession.Session.CustomerDetails.Address.PostalCode} {paymentSession.Session.CustomerDetails.Address.City}<br />
-                                    {paymentSession.Session.CustomerDetails.Phone}<br />
-                                    {paymentSession.Session.CustomerEmail}<br />
-                                </p>
-                            </td>
-                        </tr>
+                             <tr>
+                                <td>
+                                    <hr />
+                                </td>
+                            </tr>
 
-                         <tr>
-                            <td>
-                                <hr />
-                            </td>
-                        </tr>
-
-                         <tr>
-                            <td>
-                                <h3>Products</h3>      
+                             <tr>
+                                <td>
+                                    <h3>Products</h3>      
                                 
-                                <table role='presentation' style='width: 100%; max-width: 600px; border-spacing: 0; margin: 0 auto; padding: 0;'>
-                                    <thead>
-                                        <tr>
-                                            <th style='text-align: left; font-size: 14px; color: #333; border-bottom: 1px solid #ddd;'>Product</th>
-                                            <th style='text-align: left; font-size: 14px; color: #333; border-bottom: 1px solid #ddd;'>Quantity</th>
-                                            <th style='text-align: left; font-size: 14px; color: #333; border-bottom: 1px solid #ddd;'>Price</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {productTableRows}
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
+                                    <table role='presentation' style='width: 100%; max-width: 600px; border-spacing: 0; margin: 0 auto; padding: 0;'>
+                                        <thead>
+                                            <tr>
+                                                <th style='text-align: left; font-size: 14px; color: #333; border-bottom: 1px solid #ddd;'>Product</th>
+                                                <th style='text-align: left; font-size: 14px; color: #333; border-bottom: 1px solid #ddd;'>Quantity</th>
+                                                <th style='text-align: left; font-size: 14px; color: #333; border-bottom: 1px solid #ddd;'>Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {productTableRows}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
 
-                          <tr>
-                            <td>
-                                <hr />
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>
+                                    <hr />
+                                </td>
+                            </tr>
 
-                           <tr>
-                            <td>
-                                <h3>Order total</h3>
+                            <tr>
+                                <td>
+                                    <h3>Order total</h3>
 
-                                <p>
-                                    Subtotal: {paymentSession.Session.Currency.ToUpper()} {paymentSession.Session.AmountSubtotal}<br />
-                                    Shipping: {paymentSession.Session.Currency.ToUpper()} {(paymentSession.Session.ShippingCost != null ? paymentSession.Session.ShippingCost.AmountTotal : 0L)}<br />
-                                    Tax: {paymentSession.Session.Currency.ToUpper()} {(paymentSession.Session.Invoice != null ? paymentSession.Session.Invoice.Tax : 0L)}<br />
-                                    Total: {paymentSession.Session.Currency.ToUpper()} {paymentSession.Session.AmountTotal}<br />
-                                </p>
+                                    <p>
+                                        Subtotal: {paymentSession.Session.Currency.ToUpper()} {paymentSession.Session.AmountSubtotal / 100:F2}<br />
+                                        Shipping: {paymentSession.Session.Currency.ToUpper()} {(paymentSession.Session.ShippingCost != null ? paymentSession.Session.ShippingCost.AmountTotal / 100.0 : 0L):F2}<br />
+                                        Tax: {paymentSession.Session.Currency.ToUpper()} {(paymentSession.Session.Invoice != null ? paymentSession.Session.Invoice.Tax / 100.0 : 0L):F2}<br />
+                                        Total: {paymentSession.Session.Currency.ToUpper()} {paymentSession.Session.AmountTotal / 100:F2}<br />
+                                    </p>
 
-                            </td>
-                        </tr>
+                                </td>
+                            </tr>
 
+                            <tr>
+                                <td>
+                                    <p>
+                                        Thank you, <br />
+                                        Rika
+                                    </p>   
+                                </td>
+                            </tr>
 
-                         <tr>
-                            <td>
-                                <p>
-                                    Thank you, <br />
-                                    Rika
-                                </p>   
-                            </td>
-                        </tr>
-
-                        </table
-
+                        </table>
                     </body>
                 </html>    
                 ";
