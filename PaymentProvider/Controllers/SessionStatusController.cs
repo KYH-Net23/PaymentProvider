@@ -20,13 +20,14 @@ namespace PaymentProvider.Controllers
         [HttpGet]
         public ActionResult SessionStatus([FromQuery] string session_id)
         {
-
             try
             {
                 var sessionService = new SessionService();
                 var session = sessionService.Get(session_id);
 
-                _emailService.SendEmail(session.CustomerEmail, "Test", "Test", "Test");
+
+                
+                _emailService.SendEmail(session.CustomerEmail, session);
 
                 return Ok(new
                 {

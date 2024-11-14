@@ -19,7 +19,7 @@ namespace PaymentProvider.Services
                 var order = new OrderDetails
                 {
                     Id = 1,
-                    EmailAddress = "xahit81459@anypng.com",
+                    EmailAddress = "almenoliver02@gmail.com",
                     Products = _products,
                 };
                 order.OrderItemList = GetOrderItemsList(order);
