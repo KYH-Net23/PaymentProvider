@@ -4,31 +4,8 @@ using Stripe.Climate;
 
 namespace PaymentProvider.Services
 {
-    public class OrderService(HttpClient client)
+    public class OrderService()
     {
-        private readonly HttpClient _client = client;
-        private readonly List<ProductModel> _testProducts =
-        [
-            new ProductModel { Id = 1, Model = "T-Shirt", Price = 1000, Quantity = 2 },
-            new ProductModel { Id = 2, Model = "Pants", Price = 2000, Quantity = 1 }
-        ];
-        public OrderDetails? GetOrderDetails(int id)
-        {
-            if (id == 1)
-            {
-                var order = new OrderDetails
-                {
-                    Id = 1,
-                    EmailAddress = "xahit81459@anypng.com",
-                    Products = _testProducts,
-                    Address = "Norgegatan 2, 164 90"
-                };
-                order.OrderItemList = GetOrderItemsList(order);
-                return order;
-            }
-            return null!;
-        }
-
         public List<SessionLineItemOptions> GetOrderItemsList(OrderDetails order)
         {
             var lineItems = new List<SessionLineItemOptions>();
