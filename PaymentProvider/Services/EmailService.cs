@@ -1,28 +1,66 @@
 ﻿using Azure;
 using Azure.Communication.Email;
+using PaymentProvider.Models;
+using PaymentProvider.Repositories;
+using Stripe.Checkout;
 
 namespace PaymentProvider.Services
 {
-    public class EmailService
+    public class EmailService(EmailSessionRepository sessionRepository, string connectionString)
     {
-        private readonly EmailClient _emailClient;
-        private readonly string _senderAddress;
+        private readonly EmailClient _emailClient = new(connectionString);
+        private readonly EmailSessionRepository _sessionRepository = sessionRepository;
 
-        public EmailService(string connectionString = "endpoint=https://rika-payment-cs-26ac16f8.europe.communication.azure.com/;accesskey=y5trPSlDTyNeS7e845OImDEesENRtJdgQAn77mcjSLmuiLODNElLJQQJ99AKACULyCpqXhATAAAAAZCSgrWT", string senderAddress = "DoNotReply@e610b531-2626-468a-b39c-ee360d0cb912.azurecomm.net")
+        public async Task<bool> IsEmailSent(string sessionId)
         {
-            _emailClient = new EmailClient(connectionString);
-            _senderAddress = senderAddress;
+            var session = await _sessionRepository.GetEmailSessionAsync(sessionId);
+            if (session != null)
+            {
+                return session.Sent;
+            }
+            return false;
         }
 
-        public void SendEmail(string toAddress, string subject, string body, string bodyPlainText)
+        public async Task<bool> SendEmailAsync(string toAddress, Session session, OrderDetails order)
         {
-            EmailSendOperation emailSendOperation = _emailClient.Send(
-                WaitUntil.Completed,
-                senderAddress: _senderAddress,
-                recipientAddress: toAddress,
-                subject: subject,
-                htmlContent: body,
-                plainTextContent: bodyPlainText);
+            try
+            {
+                var emailSession = await _sessionRepository.GetEmailSessionAsync(session.Id);
+                if (emailSession == null)
+                {
+                    emailSession = new EmailSession
+                    {
+                        OrderId = order.Id,
+                        SessionId = session.Id,
+                        Sent = false,
+                        Date = DateTime.UtcNow,
+                    };
+                    await _sessionRepository.CreateAsync(emailSession);
+                }
+                if (!await IsEmailSent(session.Id))
+                {
+                    var emailSendOperation = await _emailClient.SendAsync(
+                        WaitUntil.Completed,
+                        senderAddress: "DoNotReply@e610b531-2626-468a-b39c-ee360d0cb912.azurecomm.net",
+                        recipientAddress: toAddress,
+                        subject: "asd",
+                        htmlContent: "asd",
+                        plainTextContent: "asd");
+                    emailSession.Sent = emailSendOperation.HasCompleted;
+                    await _sessionRepository.UpdateAsync(emailSession);
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("Email has already been sent.");
+                    return false;
+                    // handle more logic here?
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

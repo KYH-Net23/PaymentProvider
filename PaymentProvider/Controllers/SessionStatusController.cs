@@ -8,35 +8,23 @@ namespace PaymentProvider.Controllers
 {
     [Route("session-status")]
     [ApiController]
-    public class SessionStatusController : ControllerBase
+    public class SessionStatusController(EmailService emailService) : ControllerBase
     {
-        private readonly EmailService _emailService;
-
-        public SessionStatusController(EmailService emailService)
-        {
-            _emailService = emailService;
-        }
+        private readonly EmailService _emailService = emailService;
 
         [HttpGet]
-        public ActionResult SessionStatus([FromQuery] string session_id)
+        public async Task<ActionResult> SessionStatus([FromQuery] string session_id)
         {
-
             try
             {
                 var sessionService = new SessionService();
                 var session = sessionService.Get(session_id);
-
-                _emailService.SendEmail(session.CustomerEmail, "Test", "Test", "Test");
-
-                return Ok(new
+                if (session.PaymentStatus == "paid")
                 {
-                    status = session.Status,
-                    customer_details = session.CustomerDetails,
-                    line_items = session.LineItems,
-                    payment_intent = session.PaymentIntent,
-                    amount_total = session.AmountTotal,
-                    invoice = session.Invoice
-                });
+                    var emailTask = await _emailService.SendEmailAsync(session.CustomerEmail, session, new OrderDetails { Id = 1 });
+                    return Ok(new { emailSent = emailTask, status = session.Status });
+                }
+                return BadRequest(new { status = session.Status });
             }
             catch
             {

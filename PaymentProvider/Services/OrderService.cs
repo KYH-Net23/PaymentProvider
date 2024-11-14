@@ -12,7 +12,7 @@ namespace PaymentProvider.Services
             new ProductModel { Id = 1, Model = "T-Shirt", Price = 1000, Quantity = 2 },
             new ProductModel { Id = 2, Model = "Pants", Price = 2000, Quantity = 1 }
         ];
-        public async Task<OrderDetails?> GetOrderDetailsAsync(int id)
+        public OrderDetails? GetOrderDetails(int id)
         {
             if (id == 1)
             {
@@ -21,6 +21,7 @@ namespace PaymentProvider.Services
                     Id = 1,
                     EmailAddress = "xahit81459@anypng.com",
                     Products = _products,
+                    Address = "Norgegatan 2, 164 90"
                 };
                 order.OrderItemList = GetOrderItemsList(order);
                 return order;

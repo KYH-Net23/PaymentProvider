@@ -12,11 +12,11 @@ namespace PaymentProvider.Controllers
         private readonly OrderService _service = service;
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDetails?>> GetOrder(int id)
+        public ActionResult<OrderDetails?> GetOrder(int id)
         {
             try
             {
-                var order = await _service.GetOrderDetailsAsync(id);
+                var order = _service.GetOrderDetails(id);
                 if (order == null) return NotFound();
 
                 return Ok(order);
