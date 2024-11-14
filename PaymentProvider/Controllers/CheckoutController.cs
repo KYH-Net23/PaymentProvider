@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using PaymentProvider.Converters;
 using PaymentProvider.Models;
 using PaymentProvider.Services;
 using Stripe;

@@ -54,9 +54,9 @@ namespace PaymentProvider
             app.UseRouting();
             app.UseAuthorization();
             app.UseStaticFiles();
-            app.UseEndpoints(e => e.MapControllers());
+            //app.UseEndpoints(e => e.MapControllers());
 
-            //app.MapControllers();
+            app.MapControllers();
 
             app.Run();
         }

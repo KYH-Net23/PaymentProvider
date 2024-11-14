@@ -7,7 +7,7 @@ namespace PaymentProvider.Services
     public class OrderService(HttpClient client)
     {
         private readonly HttpClient _client = client;
-        private readonly List<ProductModel> _products =
+        private readonly List<ProductModel> _testProducts =
         [
             new ProductModel { Id = 1, Model = "T-Shirt", Price = 1000, Quantity = 2 },
             new ProductModel { Id = 2, Model = "Pants", Price = 2000, Quantity = 1 }
@@ -20,7 +20,7 @@ namespace PaymentProvider.Services
                 {
                     Id = 1,
                     EmailAddress = "xahit81459@anypng.com",
-                    Products = _products,
+                    Products = _testProducts,
                     Address = "Norgegatan 2, 164 90"
                 };
                 order.OrderItemList = GetOrderItemsList(order);
