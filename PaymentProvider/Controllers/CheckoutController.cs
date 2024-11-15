@@ -21,6 +21,7 @@ namespace PaymentProvider.Controllers
         {
             try
             {
+                if (!ModelState.IsValid) BadRequest();
                 if (orderDetails == null) return NotFound();
                 orderDetails.OrderItemList = _orderService.GetOrderItemsList(orderDetails);
                 var domain = "http://localhost:5173";
