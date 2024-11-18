@@ -11,5 +11,7 @@ namespace PaymentProvider.Models
         public List<ProductModel> Products { get; set; } = [];
         public List<SessionLineItemOptions> OrderItemList { get; set; } = [];
         public decimal TotalAmount { get; set; }
+        public DeliveryOption DeliveryOption { get; set; } = null!;
+        public ServicePoint ServicePoint { get; set; } = null!;
     }
 }

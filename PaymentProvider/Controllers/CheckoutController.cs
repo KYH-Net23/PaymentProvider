@@ -5,6 +5,7 @@ using PaymentProvider.Models;
 using PaymentProvider.Services;
 using Stripe;
 using Stripe.Checkout;
+using System.Net;
 
 namespace PaymentProvider.Controllers
 {
@@ -37,6 +38,14 @@ namespace PaymentProvider.Controllers
                     {
                         {"orderId", $"{orderDetails.Id}" }
                     },
+                    ShippingOptions =
+                    [
+                        _orderService.GetShippingOption(orderDetails.ServicePoint, orderDetails.DeliveryOption)
+                    ],
+                    InvoiceCreation = new SessionInvoiceCreationOptions
+                    {
+                        Enabled = true
+                    },
                 };
                 var service = new SessionService();
                 var session = service.Create(options);
@@ -45,6 +54,7 @@ namespace PaymentProvider.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.WriteLine(ex);
                 return BadRequest(ex.Message);
             }
         }

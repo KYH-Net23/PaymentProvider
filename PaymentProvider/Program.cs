@@ -26,16 +26,12 @@ namespace PaymentProvider
             }
 
             builder.Services.AddHttpClient();
+            builder.Services.AddControllers();
             builder.Services.AddDbContext<EmailSessionDbContext>(options => options.UseSqlServer(builder.Configuration["SessionDbKey"]));
             builder.Services.AddScoped<EmailSessionRepository>();
             builder.Services.AddScoped<OrderService>();
-            builder.Services.AddScoped<EmailService>(sp =>
-            {
-                var repo = sp.GetRequiredService<EmailSessionRepository>();
-                var connectionString = builder.Configuration["EmailSecret"];
-                return new EmailService(repo, connectionString!);
-            });
-            builder.Services.AddControllers();
+            builder.Services.AddScoped<EmailService>();
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 

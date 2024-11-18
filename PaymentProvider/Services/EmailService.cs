@@ -5,14 +5,17 @@ using PaymentProvider.Models;
 using PaymentProvider.Repositories;
 using Stripe;
 using Stripe.Checkout;
+using System.Text.Json;
 
 namespace PaymentProvider.Services
 {
-    public class EmailService(EmailSessionRepository sessionRepository, string connectionString)
+    public class EmailService(EmailSessionRepository sessionRepository, HttpClient client, IConfiguration config)
     {
-        private readonly EmailClient _emailClient = new(connectionString);
+        private readonly EmailClient _emailClient = new(config["EmailSecret"]);
         private readonly EmailSessionRepository _sessionRepository = sessionRepository;
         private readonly string _senderAddress = "DoNotReply@e610b531-2626-468a-b39c-ee360d0cb912.azurecomm.net";
+        private readonly string _apiKey = config["PaymentEmailSecret"]!;
+        private readonly HttpClient _client = client;
 
         public async Task<bool> IsEmailSent(string sessionId)
         {
@@ -20,8 +23,29 @@ namespace PaymentProvider.Services
 
             if (session != null)
                 return session.Sent;
-            
+
             return false;
+        }
+
+        public async Task<string> GetBearerTokenAsync()
+        {
+            var url = "https://rika-tokenservice-agbebvf3drayfqf6.swedencentral-01.azurewebsites.net/TokenGenerator/generate-email-token";
+
+            var request = new HttpRequestMessage(HttpMethod.Post, url);
+
+            request.Headers.Add("x-api-key", _apiKey);
+            request.Headers.Add("x-provider-name", "PaymentProvider-ApiKey");
+
+            var response = await _client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var parsedResponse = JsonDocument.Parse(jsonResponse);
+                var token = parsedResponse.RootElement.GetProperty("token").GetString();
+                return token!;
+            }
+            return null!;
         }
 
         public async Task<bool> SendEmailAsync(string toAddress, PaymentSession paymentSession)
@@ -35,7 +59,7 @@ namespace PaymentProvider.Services
                 var emailSession = await _sessionRepository.GetEmailSessionAsync(paymentSession.Session.Id);
 
                 if (emailSession == null)
-                {      
+                {
                     emailSession = EmailSessionFactory.Create(paymentSession.Session.Id, paymentSession.OrderId, false, DateTime.UtcNow);
                     await _sessionRepository.CreateAsync(emailSession);
                 }
@@ -75,7 +99,7 @@ namespace PaymentProvider.Services
                 {
                     productTableRows += $@"
                     <tr>
-                        <td style='padding: 10px; font-size: 14px; color: #555;'>{product.Description}</td>
+                        <td style='padding: 10px; font-size: 14px; color: #555;'>{product.Description} </td>
                         <td style='padding: 10px; font-size: 14px; color: #555;'>{product.Quantity}</td>
                         <td style='padding: 10px; font-size: 14px; color: #555;'>{paymentSession.Session.Currency.ToUpper()} {product.Price.UnitAmount / 100:F2}</td>
                     </tr>
@@ -109,7 +133,7 @@ namespace PaymentProvider.Services
                                 <h3>Order Information</h3>
 
                                 <p>
-                                    Payment date: <strong>{paymentSession.Session.Created.ToString("g")}</strong><br />
+                                    Payment date: <strong>{paymentSession.Session.Created:g}</strong><br />
                                     Order number: <strong>{paymentSession.OrderId}</strong><br />
                                     Payment method: <strong>{paymentSession.PaymentMethod.Type} {paymentSession.PaymentMethodInfo}</strong><br />
                                     Delivery method: <strong>Some delivery method</strong><br />
@@ -174,10 +198,10 @@ namespace PaymentProvider.Services
                                 <h3>Order total</h3>
 
                                 <p>
-                                    Subtotal: {paymentSession.Session.Currency.ToUpper()} {paymentSession.Session.AmountSubtotal}<br />
-                                    Shipping: {paymentSession.Session.Currency.ToUpper()} {(paymentSession.Session.ShippingCost != null ? paymentSession.Session.ShippingCost.AmountTotal : 0L)}<br />
-                                    Tax: {paymentSession.Session.Currency.ToUpper()} {(paymentSession.Session.Invoice != null ? paymentSession.Session.Invoice.Tax : 0L)}<br />
-                                    Total: {paymentSession.Session.Currency.ToUpper()} {paymentSession.Session.AmountTotal}<br />
+                                    Subtotal: {paymentSession.Session.Currency.ToUpper()} {paymentSession.Session.AmountSubtotal / 100:F2}<br />
+                                    Shipping: {paymentSession.Session.Currency.ToUpper()} {(paymentSession.Session.ShippingCost != null ? paymentSession.Session.ShippingCost.AmountTotal / 100m : 0L)}<br />
+                                    Tax: {paymentSession.Session.Currency.ToUpper()} {(paymentSession.Session.Invoice != null ? paymentSession.Session.Invoice.Tax / 100m : 0L)}<br />
+                                    Total: {paymentSession.Session.Currency.ToUpper()} {paymentSession.Session.AmountTotal / 100:F2}<br />
                                 </p>
 
                             </td>
