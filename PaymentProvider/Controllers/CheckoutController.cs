@@ -46,6 +46,8 @@ namespace PaymentProvider.Controllers
                     {
                         Enabled = true
                     },
+                    BillingAddressCollection = "required",
+
                 };
                 var service = new SessionService();
                 var session = service.Create(options);

@@ -1,6 +1,6 @@
 ﻿namespace PaymentProvider.Models
 {
-    public class ProductModel
+    public class PaymentProductModel
     {
         public int Id { get; set; }
         public string Model { get; set; } = null!;
