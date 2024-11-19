@@ -12,13 +12,26 @@ using System.Text.Json;
 
 namespace PaymentProvider.Services
 {
-    public class EmailService(EmailSessionRepository sessionRepository, HttpClient client, IConfiguration config)
+    public class EmailService
     {
-        private readonly EmailClient _emailClient = new(config["EmailSecret"]);
-        private readonly EmailSessionRepository _sessionRepository = sessionRepository;
+        public EmailService(EmailSessionRepository sessionRepository, HttpClient client, IConfiguration config)
+        {
+            _sessionRepository = sessionRepository;
+            _client = client;
+            _emailClient = new(config["EmailSecret"]);
+            _apiKey = config["PaymentEmailSecret"]!;
+        }
+        public EmailService(HttpClient client, IConfiguration config)
+        {
+            _client = client;
+            _apiKey = config["PaymentEmailSecret"]!;
+        }
+
+        private readonly EmailClient _emailClient;
+        private readonly EmailSessionRepository _sessionRepository;
         private readonly string _senderAddress = "DoNotReply@e610b531-2626-468a-b39c-ee360d0cb912.azurecomm.net";
-        private readonly string _apiKey = config["PaymentEmailSecret"]!;
-        private readonly HttpClient _client = client;
+        private readonly string _apiKey;
+        private readonly HttpClient _client;
 
         public async Task<bool> IsEmailSent(string sessionId)
         {
@@ -52,7 +65,7 @@ namespace PaymentProvider.Services
 
         public async Task SendEmailInformationAsync(OrderConfirmationModel order)
         {
-            order.ReceivingEmail = "hossenrahimzadegan@gmail.com";
+            order.Shipping.TrackingLink = null;
             var url = "https://rika-solutions-email-provider.azurewebsites.net/OrderConfirmation";
 
             string token = await GetBearerTokenAsync();
@@ -64,8 +77,6 @@ namespace PaymentProvider.Services
             HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = await _client.PostAsync(url, content);
-
-            Console.WriteLine($"Response ({response.StatusCode}): {await response.Content.ReadAsStringAsync()}");
         }
 
         public async Task<bool> SendEmailAsync(string toAddress, PaymentSession paymentSession)
