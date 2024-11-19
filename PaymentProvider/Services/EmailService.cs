@@ -52,6 +52,7 @@ namespace PaymentProvider.Services
 
         public async Task SendEmailInformationAsync(OrderConfirmationModel order)
         {
+            order.ReceivingEmail = "hossenrahimzadegan@gmail.com";
             var url = "https://rika-solutions-email-provider.azurewebsites.net/OrderConfirmation";
 
             string token = await GetBearerTokenAsync();
@@ -60,7 +61,11 @@ namespace PaymentProvider.Services
 
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _client.PostAsync(url, content);
+
+            Console.WriteLine($"Response ({response.StatusCode}): {await response.Content.ReadAsStringAsync()}");
         }
 
         public async Task<bool> SendEmailAsync(string toAddress, PaymentSession paymentSession)
