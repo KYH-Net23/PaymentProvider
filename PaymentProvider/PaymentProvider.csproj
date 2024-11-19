@@ -7,9 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Repositories\**" />
     <Compile Remove="Responses\**" />
+    <Content Remove="Repositories\**" />
     <Content Remove="Responses\**" />
+    <EmbeddedResource Remove="Repositories\**" />
     <EmbeddedResource Remove="Responses\**" />
+    <None Remove="Repositories\**" />
     <None Remove="Responses\**" />
   </ItemGroup>
 
