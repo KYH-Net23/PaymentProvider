@@ -3,7 +3,6 @@ using Azure.Communication.Email;
 using PaymentProvider.Factories;
 using PaymentProvider.Models;
 using PaymentProvider.Models.OrderConfirmationModels;
-using PaymentProvider.Repositories;
 using Stripe;
 using Stripe.Checkout;
 using System.Net.Http.Headers;
@@ -12,23 +11,22 @@ using System.Text.Json;
 
 namespace PaymentProvider.Services
 {
-    public class EmailService(EmailSessionRepository sessionRepository, HttpClient client, IConfiguration config)
+    public class EmailService(HttpClient client, IConfiguration config)
     {
         private readonly EmailClient _emailClient = new(config["EmailSecret"]);
-        private readonly EmailSessionRepository _sessionRepository = sessionRepository;
         private readonly string _senderAddress = "DoNotReply@e610b531-2626-468a-b39c-ee360d0cb912.azurecomm.net";
         private readonly string _apiKey = config["PaymentEmailSecret"]!;
         private readonly HttpClient _client = client;
 
-        public async Task<bool> IsEmailSent(string sessionId)
-        {
-            var session = await _sessionRepository.GetEmailSessionAsync(sessionId);
+        //public async Task<bool> IsEmailSent(string sessionId)
+        //{
+        //    var session = await _sessionRepository.GetEmailSessionAsync(sessionId);
 
-            if (session != null)
-                return session.Sent;
+        //    if (session != null)
+        //        return session.Sent;
 
-            return false;
-        }
+        //    return false;
+        //}
 
         public async Task<string> GetBearerTokenAsync()
         {
@@ -63,48 +61,48 @@ namespace PaymentProvider.Services
             var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
         }
 
-        public async Task<bool> SendEmailAsync(string toAddress, PaymentSession paymentSession)
-        {
-            try
-            {
-                var emailContent = GenerateEmailContent(paymentSession);
+        //public async Task<bool> SendEmailAsync(string toAddress, PaymentSession paymentSession)
+        //{
+        //    try
+        //    {
+        //        var emailContent = GenerateEmailContent(paymentSession);
 
-                if (string.IsNullOrEmpty(emailContent)) return false;
+        //        if (string.IsNullOrEmpty(emailContent)) return false;
 
-                var emailSession = await _sessionRepository.GetEmailSessionAsync(paymentSession.Session.Id);
+        //        var emailSession = await _sessionRepository.GetEmailSessionAsync(paymentSession.Session.Id);
 
-                if (emailSession == null)
-                {
-                    emailSession = EmailSessionFactory.Create(paymentSession.Session.Id, paymentSession.OrderId, false, DateTime.UtcNow);
-                    await _sessionRepository.CreateAsync(emailSession);
-                }
-                if (!await IsEmailSent(paymentSession.Session.Id))
-                {
-                    var emailSendOperation = await _emailClient.SendAsync(
-                        WaitUntil.Completed,
-                        senderAddress: _senderAddress,
-                        recipientAddress: toAddress,
-                        subject: "Rika - Your payment was successful!",
-                        htmlContent: emailContent,
-                        plainTextContent: ""
-                    );
+        //        if (emailSession == null)
+        //        {
+        //            emailSession = EmailSessionFactory.Create(paymentSession.Session.Id, paymentSession.OrderId, false, DateTime.UtcNow);
+        //            await _sessionRepository.CreateAsync(emailSession);
+        //        }
+        //        if (!await IsEmailSent(paymentSession.Session.Id))
+        //        {
+        //            var emailSendOperation = await _emailClient.SendAsync(
+        //                WaitUntil.Completed,
+        //                senderAddress: _senderAddress,
+        //                recipientAddress: toAddress,
+        //                subject: "Rika - Your payment was successful!",
+        //                htmlContent: emailContent,
+        //                plainTextContent: ""
+        //            );
 
-                    emailSession.Sent = emailSendOperation.HasCompleted;
-                    await _sessionRepository.UpdateAsync(emailSession);
-                    return true;
-                }
-                else
-                {
-                    Console.WriteLine("Email has already been sent.");
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-        }
+        //            emailSession.Sent = emailSendOperation.HasCompleted;
+        //            await _sessionRepository.UpdateAsync(emailSession);
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine("Email has already been sent.");
+        //            return false;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //        return false;
+        //    }
+        //}
         private static string GenerateEmailContent(PaymentSession paymentSession)
         {
             try

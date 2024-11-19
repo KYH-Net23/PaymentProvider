@@ -37,7 +37,7 @@ namespace PaymentProvider.Controllers
                 {
                     var paymentSession = PaymentSessionFactory.Create(session, int.Parse(session.Metadata["orderId"]), paymentMethod, paymentIntent);
                     var emailToken = _emailService.GetBearerTokenAsync();
-                    var emailTask = await _emailService.SendEmailAsync(session.CustomerEmail, paymentSession);
+                    //var emailTask = await _emailService.SendEmailAsync(session.CustomerEmail, paymentSession);
                     return Ok(new { token = emailToken, paymentSession = session, status = session.Status, customer_email = session.CustomerEmail });
                 }
                 return BadRequest(new { status = session.Status });
