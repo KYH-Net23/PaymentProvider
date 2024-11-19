@@ -8,8 +8,6 @@ namespace PaymentProvider.Services
 {
     public class EmailService(HttpClient client, IConfiguration config)
     {
-        private readonly EmailClient _emailClient = new(config["EmailSecret"]);
-        private readonly string _senderAddress = "DoNotReply@e610b531-2626-468a-b39c-ee360d0cb912.azurecomm.net";
         private readonly string _apiKey = config["PaymentEmailSecret"]!;
         private readonly HttpClient _client = client;
 
