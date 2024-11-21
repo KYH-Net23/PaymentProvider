@@ -1,4 +1,8 @@
-﻿using PaymentProvider.Models.OrderConfirmationModels;
+﻿using Azure;
+using Azure.Communication.Email;
+using PaymentProvider.Factories;
+using PaymentProvider.Models;
+using PaymentProvider.Models.OrderConfirmationModels;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;

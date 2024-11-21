@@ -1,7 +1,6 @@
 using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
 using PaymentProvider.Contexts;
-using PaymentProvider.Repositories;
 using PaymentProvider.Services;
 using Stripe;
 
@@ -27,8 +26,7 @@ namespace PaymentProvider
 
             builder.Services.AddHttpClient();
             builder.Services.AddControllers();
-            builder.Services.AddDbContext<EmailSessionDbContext>(options => options.UseSqlServer(builder.Configuration["SessionDbKey"]));
-            builder.Services.AddScoped<EmailSessionRepository>();
+            builder.Services.AddDbContext<RikaOrdersDbContext>(options => options.UseSqlServer(builder.Configuration["OrderDbConnectionString"]));
             builder.Services.AddScoped<OrderService>();
             builder.Services.AddScoped<EmailService>();
             builder.Services.AddScoped<StripeService>();
