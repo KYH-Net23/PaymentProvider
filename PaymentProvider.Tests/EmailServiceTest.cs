@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using PaymentProvider.Models.OrderConfirmationModels;
-using PaymentProvider.Repositories;
 using PaymentProvider.Services;
 using System;
 using System.Collections.Generic;
