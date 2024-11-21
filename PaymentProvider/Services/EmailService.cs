@@ -1,6 +1,4 @@
-﻿using Azure.Communication.Email;
-using PaymentProvider.Models.OrderConfirmationModels;
-using System;
+﻿using PaymentProvider.Models.OrderConfirmationModels;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -44,7 +42,6 @@ namespace PaymentProvider.Services
             try
             {
                 if (order == null) return false;
-                order.Shipping.TrackingLink = null;
 
                 string token = await GetBearerTokenAsync();
                 if (string.IsNullOrEmpty(token)) return false;
