@@ -29,6 +29,7 @@ namespace PaymentProvider
             builder.Services.AddDbContext<RikaOrdersDbContext>(options => options.UseSqlServer(builder.Configuration["OrderDbConnectionString"]));
             builder.Services.AddScoped<OrderService>();
             builder.Services.AddScoped<EmailService>();
+            builder.Services.AddScoped<StripeService>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

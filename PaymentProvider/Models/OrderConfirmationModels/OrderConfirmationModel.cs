@@ -4,7 +4,6 @@ namespace PaymentProvider.Models.OrderConfirmationModels
 {
     public class OrderConfirmationModel
     {
-
         [Required]
         public string ReceivingEmail { get; set; } = null!;
         [Required]
@@ -16,6 +15,5 @@ namespace PaymentProvider.Models.OrderConfirmationModels
         [Required]
         [Range(1, 10_000_000)]
         public decimal OrderTotal { get; set; }
-
     }
 }
