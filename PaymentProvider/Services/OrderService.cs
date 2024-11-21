@@ -22,11 +22,12 @@ namespace PaymentProvider.Services
             catch { }
         }
 
-        public void Delete(OrderEntity order)
+        public async void Delete(OrderEntity order)
         {
             try
             {
                 _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
             }
             catch { }
         }
@@ -36,6 +37,25 @@ namespace PaymentProvider.Services
             try
             {
                 var order = await _context.Orders.FirstOrDefaultAsync(o => o.SessionId == sessionId);
+                if (order == null) return null!;
+                order = await _context.Orders
+                    .Include(o => o.Products)
+                    .Include(o => o.Shipping)
+                    .ThenInclude(s => s.CustomerDeliveryInformation)
+                    .Include(o => o.Shipping)
+                    .ThenInclude(s => s.PostalAgentDeliveryInformation)
+                    .FirstOrDefaultAsync(o => o.Id == order.Id);
+                if (order == null) return null!;
+                return order;
+            }
+            catch { return null!; }
+        }
+
+        public async Task<OrderEntity> GetAsync(int orderId)
+        {
+            try
+            {
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
                 if (order == null) return null!;
                 order = await _context.Orders
                     .Include(o => o.Products)
@@ -72,7 +92,6 @@ namespace PaymentProvider.Services
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
                             Name = product.Name,
-
                         },
                         UnitAmount = (long)product.Price,
 

@@ -17,6 +17,8 @@ namespace PaymentProvider.Entities
         [Range(1, 10_000)]
         public int Amount { get; set; }
 
+        public string? Description { get; set; }
+
         [Required]
         [Range(1, 100_000)]
         public decimal Price { get; set; }

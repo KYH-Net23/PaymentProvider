@@ -17,6 +17,7 @@ namespace PaymentProvider.Models.OrderConfirmationModels
         public decimal Price { get; set; }
         public string? Category { get; set; }
         public string? Size { get; set; }
+        public string? Description { get; set; }
 
         [Required]
         [Range(1, 100_000)]

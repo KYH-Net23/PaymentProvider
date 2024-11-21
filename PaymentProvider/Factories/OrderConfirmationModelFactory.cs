@@ -17,7 +17,8 @@ namespace PaymentProvider.Factories
                     PostalCode = order.Invoice.PostalCode,
                     StreetAddress = order.Invoice.StreetAddress,
                     City = order.Invoice.City,
-                    //PhoneNumber = order.Shipping.CustomerDeliveryInformation.PhoneNumber
+                    InvoiceUrl = order.Invoice.InvoiceUrl ?? "",
+                    PhoneNumber = order.Shipping.CustomerDeliveryInformation.PhoneNumber ?? ""
                 },
                 Products = order.Products.Select(productModel => new ProductModel
                 {
@@ -26,6 +27,7 @@ namespace PaymentProvider.Factories
                     DiscountedPrice = productModel.DiscountedPrice,
                     ImageUrl = productModel.ImageUrl,
                     Name = productModel.Name,
+                    Description = productModel.Description,
                     Price = productModel.Price,
                     ProductId = productModel.ProductId,
                     Size = productModel.Size

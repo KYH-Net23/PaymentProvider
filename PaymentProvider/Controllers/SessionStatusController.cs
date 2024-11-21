@@ -40,12 +40,12 @@ namespace PaymentProvider.Controllers
                 var invoice = invoiceService.Get(paymentIntent.InvoiceId);
 
                 session.Invoice = invoice;
-                var order = await _orderService.GetAsync(session_id);
-
-
                 session.Customer = customer;
                 session.PaymentIntent = paymentIntent;
                 session.PaymentIntent.PaymentMethod = paymentMethod;
+
+                var order = await _orderService.GetAsync(session_id);
+
                 order.Invoice = new InvoiceEntity
                 {
                     City = session.Invoice.CustomerAddress.City ?? "",
@@ -54,7 +54,9 @@ namespace PaymentProvider.Controllers
                     PaymentOption = session.PaymentIntent.PaymentMethod.Card.Brand ?? "",
                     PostalCode = session.Invoice.CustomerAddress.PostalCode ?? "",
                     StreetAddress = session.Invoice.CustomerAddress.Line1 ?? "",
+                    InvoiceUrl = session.Invoice.InvoicePdf ?? ""
                 };
+
                 session.LineItems = lineItems;
 
                 if (session.PaymentStatus == "paid")
@@ -63,7 +65,7 @@ namespace PaymentProvider.Controllers
                     if (await _emailService.SendEmailInformationAsync(orderConfirmation))
                     {
                         await _orderService.SaveChangesAsync();
-                        return Ok(new { paymentSession = session, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email, paymentMethod, paymentIntent });
+                        return Ok(new { session, orderConfirmation, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email });
                     }
                     _orderService.Delete(order);
                     return BadRequest();

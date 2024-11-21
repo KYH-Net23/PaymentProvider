@@ -54,6 +54,7 @@ namespace PaymentProvider.Services
                 _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
                 HttpResponseMessage response = await _client.PostAsync(_emailUrl, content);
+                Console.WriteLine(response.Content.ReadAsStringAsync());
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)

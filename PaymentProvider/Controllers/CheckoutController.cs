@@ -15,54 +15,6 @@ namespace PaymentProvider.Controllers
         private readonly OrderService _orderService = orderService;
         private readonly StripeService _stripeCustomerService = stripeCustomerService;
 
-        // api to get customer information and order details
-
-        //[HttpPost]
-        //public ActionResult Create([FromBody] OrderDetails orderDetails)
-        //{
-        //    try
-        //    {
-        //        if (!ModelState.IsValid) BadRequest();
-        //        if (orderDetails == null) return NotFound();
-        //        orderDetails.OrderItemList = _orderService.GetOrderItemsList(orderDetails);
-        //        var domain = "http://localhost:5173";
-        //        var customer = _stripeCustomerService.CreateCustomer(orderDetails);
-        //        var options = new SessionCreateOptions
-        //        {
-        //            UiMode = "embedded",
-        //            Currency = "sek",
-        //            LineItems = orderDetails.OrderItemList,
-        //            Mode = "payment",
-        //            ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
-        //            //CustomerEmail = orderDetails!.EmailAddress,
-        //            Customer = customer.Id,
-        //            Metadata = new Dictionary<string, string>
-        //            {
-        //                {"orderId", $"{orderDetails.Id}" }
-        //            },
-        //            ShippingOptions =
-        //            [
-        //                _orderService.GetShippingOption(orderDetails.ServicePoint, orderDetails.DeliveryOption)
-        //            ],
-        //            InvoiceCreation = new SessionInvoiceCreationOptions
-        //            {
-        //                Enabled = true
-        //            },
-        //            BillingAddressCollection = "required",
-
-        //        };
-        //        var service = new SessionService();
-        //        var session = service.Create(options);
-        //        session.Customer = customer;
-        //        return Ok(new { sessionId = session.Id, clientSecret = session.ClientSecret });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex.Message);
-        //        Console.WriteLine(ex);
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] OrderModel orderDetails)
         {
@@ -70,6 +22,8 @@ namespace PaymentProvider.Controllers
             {
                 if (!ModelState.IsValid) BadRequest();
                 if (orderDetails == null) return NotFound();
+                var orderEntity = OrderEntityFactory.Create(orderDetails);
+                await _orderService.CreateOrderAsync(orderEntity);
                 var domain = "http://localhost:5173";
                 var customer = _stripeCustomerService.CreateCustomer(orderDetails);
                 var options = new SessionCreateOptions
@@ -79,12 +33,7 @@ namespace PaymentProvider.Controllers
                     LineItems = _orderService.GetOrderItemsList(orderDetails),
                     Mode = "payment",
                     ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
-                    //CustomerEmail = orderDetails!.EmailAddress,
                     Customer = customer.Id,
-                    Metadata = new Dictionary<string, string>
-                    {
-                        {"orderId", $"{1}" }
-                    },
                     ShippingOptions =
                     [
                         _orderService.GetShippingOption(orderDetails)
@@ -93,20 +42,21 @@ namespace PaymentProvider.Controllers
                     {
                         Enabled = true
                     },
+                    Metadata = new Dictionary<string, string>
+                    {
+                        {"orderId", $"{orderEntity.Id}" }
+                    },
                     BillingAddressCollection = "required",
-
                 };
                 var service = new SessionService();
                 var session = service.Create(options);
-                var orderEntity = OrderEntityFactory.Create(orderDetails, session);
-                await _orderService.CreateOrderAsync(orderEntity);
-
                 session.Customer = customer;
+                orderEntity.SessionId = session.Id;
+                await _orderService.SaveChangesAsync();
                 return Ok(new { sessionId = session.Id, clientSecret = session.ClientSecret });
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
                 Console.WriteLine(ex);
                 return BadRequest(ex.Message);
             }
