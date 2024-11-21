@@ -4,18 +4,14 @@ namespace PaymentProvider.Factories.Entities;
 
 public static class ShippingEntityFactory
 {
-    public static ShippingEntity Create(string fullName, string customerDeliveryAddress, string postalPickUpAddress, string phoneNumber, DateOnly orderArrival, Uri trackingLink)
+    public static ShippingEntity Create(CustomerDeliveryInformationEntity customerDeliveryInformation, PostalAgentDeliveryInformationEntity postalAgentDeliveryInformation, DateOnly orderArrival, string trackingLink = null!)
     {
-        //return new ShippingEntity
-        //{
-        //    FullName = fullName,
-        //    CustomerDeliveryAddress = customerDeliveryAddress,
-        //    PostalPickUpAddress = postalPickUpAddress,
-        //    PhoneNumber = phoneNumber,
-        //    OrderArrival = orderArrival,
-        //    TrackingLink = trackingLink
-        //};
-
-        return new ShippingEntity();
+        return new ShippingEntity
+        {
+            CustomerDeliveryInformation = customerDeliveryInformation,
+            PostalAgentDeliveryInformation = postalAgentDeliveryInformation,  
+            OrderArrival = orderArrival,
+            TrackingLink = trackingLink
+        };
     }
 }
