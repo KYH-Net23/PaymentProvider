@@ -20,23 +20,53 @@ namespace PaymentProvider.Factories
                 Phone = order.PhoneNumber
             };
         }
-        public static CustomerCreateOptions Create(OrderConfirmationModel order)
+        //public static CustomerCreateOptions Create(OrderConfirmationModel order)
+        //{
+        //    return new CustomerCreateOptions
+        //    {
+        //        Shipping = new ShippingOptions
+        //        {
+        //            Name = order.Shipping.FullName,
+        //            Address = new AddressOptions
+        //            {
+        //                Line1 = order.Shipping.CustomerDeliveryAddress
+        //            },
+        //            Phone = order.Shipping.PhoneNumber
+        //        },
+        //        Email = order.ReceivingEmail,
+        //        PaymentMethod = order.Invoice.PaymentOption,
+        //        Phone = order.Shipping.PhoneNumber,
+        //        Name = order.Shipping.FullName,
+        //    };
+        //}
+        public static CustomerCreateOptions Create(OrderModel order)
         {
             return new CustomerCreateOptions
             {
+                Address = new AddressOptions
+                {
+                    Line1 = order.Shipping.CustomerDeliveryInformation.StreetAddress,
+                    City = order.Shipping.CustomerDeliveryInformation.City,
+                    Country = order.Shipping.CustomerDeliveryInformation.Country,
+                    PostalCode = order.Shipping.CustomerDeliveryInformation.PostalCode,
+                    State = order.Shipping.CustomerDeliveryInformation.City
+                },
                 Shipping = new ShippingOptions
                 {
-                    Name = order.Shipping.FullName,
+                    Name = order.Shipping.CustomerDeliveryInformation.FullName,
                     Address = new AddressOptions
                     {
-                        Line1 = order.Shipping.CustomerDeliveryAddress
+                        Line1 = order.Shipping.CustomerDeliveryInformation.StreetAddress,
+                        City = order.Shipping.CustomerDeliveryInformation.City,
+                        Country = order.Shipping.CustomerDeliveryInformation.Country,
+                        PostalCode = order.Shipping.CustomerDeliveryInformation.PostalCode,
+                        State = order.Shipping.CustomerDeliveryInformation.City
                     },
-                    Phone = order.Shipping.PhoneNumber
+                    Phone = order.Shipping.CustomerDeliveryInformation.PhoneNumber
                 },
                 Email = order.ReceivingEmail,
-                PaymentMethod = order.Invoice.PaymentOption,
-                Phone = order.Shipping.PhoneNumber,
-                Name = order.Shipping.FullName,
+                Phone = order.Shipping.CustomerDeliveryInformation.PhoneNumber,
+                Name = order.Shipping.CustomerDeliveryInformation.FullName,
             };
         }
     }

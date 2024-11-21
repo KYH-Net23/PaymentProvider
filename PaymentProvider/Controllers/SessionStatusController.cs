@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PaymentProvider.Entities;
 using PaymentProvider.Factories;
 using PaymentProvider.Models;
 using PaymentProvider.Services;
@@ -10,9 +11,10 @@ namespace PaymentProvider.Controllers
 {
     [Route("session-status")]
     [ApiController]
-    public class SessionStatusController(EmailService emailService) : ControllerBase
+    public class SessionStatusController(EmailService emailService, OrderService orderService) : ControllerBase
     {
         private readonly EmailService _emailService = emailService;
+        private readonly OrderService _orderService = orderService;
 
         [HttpGet]
         public async Task<ActionResult> SessionStatus([FromQuery] string session_id)
@@ -27,7 +29,6 @@ namespace PaymentProvider.Controllers
 
                 var customerService = new CustomerService();
                 var customer = customerService.Get(session.CustomerId);
-                session.Customer = customer;
 
                 var paymentIntentService = new PaymentIntentService();
                 var paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
@@ -38,14 +39,34 @@ namespace PaymentProvider.Controllers
                 var invoiceService = new InvoiceService();
                 var invoice = invoiceService.Get(paymentIntent.InvoiceId);
 
+                session.Invoice = invoice;
+                var order = await _orderService.GetAsync(session_id);
+
+
+                session.Customer = customer;
+                session.PaymentIntent = paymentIntent;
+                session.PaymentIntent.PaymentMethod = paymentMethod;
+                order.Invoice = new InvoiceEntity
+                {
+                    City = session.Invoice.CustomerAddress.City ?? "",
+                    Country = session.Invoice.CustomerAddress.Country ?? "",
+                    FullName = session.Invoice.CustomerName ?? "",
+                    PaymentOption = session.PaymentIntent.PaymentMethod.Card.Brand ?? "",
+                    PostalCode = session.Invoice.CustomerAddress.PostalCode ?? "",
+                    StreetAddress = session.Invoice.CustomerAddress.Line1 ?? "",
+                };
                 session.LineItems = lineItems;
 
                 if (session.PaymentStatus == "paid")
                 {
-                    var paymentSession = PaymentSessionFactory.Create(session, int.Parse(session.Metadata["orderId"]), paymentMethod, paymentIntent);
-                    //var emailToken = _emailService.GetBearerTokenAsync();
-                    //var emailTask = await _emailService.SendEmailAsync(session.CustomerEmail, paymentSession);
-                    return Ok(new { paymentSession = session, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email, paymentMethod, paymentIntent });
+                    var orderConfirmation = OrderConfirmationModelFactory.Create(order);
+                    if (await _emailService.SendEmailInformationAsync(orderConfirmation))
+                    {
+                        await _orderService.SaveChangesAsync();
+                        return Ok(new { paymentSession = session, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email, paymentMethod, paymentIntent });
+                    }
+                    _orderService.Delete(order);
+                    return BadRequest();
                 }
                 return BadRequest(new { status = session.Status });
             }

@@ -23,5 +23,6 @@ namespace PaymentProvider.Models.OrderConfirmationModels
         [Required]
         [MinLength(2, ErrorMessage = "Payment Option must be atleast 2 characters.")]
         public string PaymentOption { get; set; } = null!;
+        public string? PhoneNumber { get; set; }
     }
 }

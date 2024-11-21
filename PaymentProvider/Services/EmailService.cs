@@ -3,6 +3,7 @@ using Azure.Communication.Email;
 using PaymentProvider.Factories;
 using PaymentProvider.Models;
 using PaymentProvider.Models.OrderConfirmationModels;
+using System;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -50,15 +51,9 @@ namespace PaymentProvider.Services
                 string token = await GetBearerTokenAsync();
                 if (string.IsNullOrEmpty(token)) return false;
                 var jsonData = JsonSerializer.Serialize(order);
-
-                var request = new HttpRequestMessage(HttpMethod.Post, _emailUrl)
-                {
-                    Content = new StringContent(jsonData, Encoding.UTF8, "application/json")
-                };
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                var response = await _client.SendAsync(request);
-
+                _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await _client.PostAsync(_emailUrl, content);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)

@@ -1,13 +1,11 @@
-﻿using PaymentProvider.Models.OrderConfirmationModels;
+﻿using PaymentProvider.Entities;
+using PaymentProvider.Models.OrderConfirmationModels;
 using System.ComponentModel.DataAnnotations;
 
-namespace PaymentProvider.Entities
+namespace PaymentProvider.Models
 {
-    public class OrderEntity
+    public class OrderModel
     {
-        [Key]
-        public int Id { get; set; }
-
         [Required]
         public DateTime Date { get; set; }
 
@@ -22,11 +20,8 @@ namespace PaymentProvider.Entities
         public ShippingEntity Shipping { get; set; } = null!;
 
         [Required]
-        public InvoiceEntity Invoice { get; set; } = null!;
-
+        public List<ProductModel> Products { get; set; } = null!;
         [Required]
-        public List<ProductEntity> Products { get; set; } = null!;
-
-        public string? SessionId { get; set; }
+        public decimal ShippingPrice { get; set; }
     }
 }
