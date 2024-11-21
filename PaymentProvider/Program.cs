@@ -31,6 +31,7 @@ namespace PaymentProvider
             builder.Services.AddScoped<EmailSessionRepository>();
             builder.Services.AddScoped<OrderService>();
             builder.Services.AddScoped<EmailService>();
+            builder.Services.AddScoped<StripeService>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

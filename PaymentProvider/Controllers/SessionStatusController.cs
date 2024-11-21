@@ -25,11 +25,18 @@ namespace PaymentProvider.Controllers
                 var sessionLineItemService = new SessionLineItemService();
                 var lineItems = sessionLineItemService.List(session_id);
 
+                var customerService = new CustomerService();
+                var customer = customerService.Get(session.CustomerId);
+                session.Customer = customer;
+
                 var paymentIntentService = new PaymentIntentService();
                 var paymentIntent = paymentIntentService.Get(session.PaymentIntentId);
 
                 var paymentMethodService = new PaymentMethodService();
                 var paymentMethod = paymentMethodService.Get(paymentIntent.PaymentMethodId);
+
+                var invoiceService = new InvoiceService();
+                var invoice = invoiceService.Get(paymentIntent.InvoiceId);
 
                 session.LineItems = lineItems;
 
@@ -38,7 +45,7 @@ namespace PaymentProvider.Controllers
                     var paymentSession = PaymentSessionFactory.Create(session, int.Parse(session.Metadata["orderId"]), paymentMethod, paymentIntent);
                     //var emailToken = _emailService.GetBearerTokenAsync();
                     //var emailTask = await _emailService.SendEmailAsync(session.CustomerEmail, paymentSession);
-                    return Ok(new { paymentSession = session, status = session.Status, customer_email = session.CustomerEmail });
+                    return Ok(new { paymentSession = session, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email, paymentMethod, paymentIntent });
                 }
                 return BadRequest(new { status = session.Status });
             }
