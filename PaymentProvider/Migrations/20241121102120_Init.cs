@@ -36,7 +36,10 @@ namespace PaymentProvider.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CustomerDeliveryAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StreetAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PostalCode = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PostalPickUpAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OrderArrival = table.Column<DateOnly>(type: "date", nullable: false),
@@ -86,6 +89,9 @@ namespace PaymentProvider.Migrations
                     Amount = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DiscountedPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Size = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     OrderEntityId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>

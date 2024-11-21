@@ -12,7 +12,7 @@ using PaymentProvider.Contexts;
 namespace PaymentProvider.Migrations
 {
     [DbContext(typeof(RikaOrdersDbContext))]
-    [Migration("20241119104257_Init")]
+    [Migration("20241121102120_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -107,9 +107,16 @@ namespace PaymentProvider.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal?>("DiscountedPrice")
                         .IsRequired()
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -120,6 +127,10 @@ namespace PaymentProvider.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -136,7 +147,11 @@ namespace PaymentProvider.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CustomerDeliveryAddress")
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -151,7 +166,16 @@ namespace PaymentProvider.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
+
                     b.Property<string>("PostalPickUpAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StreetAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
