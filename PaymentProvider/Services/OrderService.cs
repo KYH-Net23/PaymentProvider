@@ -22,10 +22,23 @@ namespace PaymentProvider.Services
             catch { }
         }
 
-        public async void Delete(OrderEntity order)
+        public async Task Delete(OrderEntity order)
         {
             try
             {
+                if (order == null) return;
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+            }
+            catch { }
+        }
+
+        public async Task Delete(int id)
+        {
+            try
+            {
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id);
+                if (order == null) return;
                 _context.Orders.Remove(order);
                 await _context.SaveChangesAsync();
             }
@@ -88,14 +101,17 @@ namespace PaymentProvider.Services
                 {
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        Currency = "sek",
+                        Currency = "usd",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
                             Name = product.Name,
                         },
-                        UnitAmount = (long)product.Price,
-
+                        UnitAmount = (long)(product.Price * 100),
                     },
+                    TaxRates =
+                    [
+                        "txr_1QNyV8KTnkBH3a68eOoFL3Ke"
+                    ],
                     Quantity = product.Amount,
                 });
             }
@@ -136,9 +152,10 @@ namespace PaymentProvider.Services
                     Type = "fixed_amount",
                     FixedAmount = new SessionShippingOptionShippingRateDataFixedAmountOptions
                     {
-                        Currency = "SEK",
+                        Currency = "usd",
                         Amount = (long)order.ShippingPrice * 100,
                     },
+                    TaxBehavior = "inclusive",
                     DisplayName = order.Shipping.PostalAgentDeliveryInformation.PostalAgentName,
                     DeliveryEstimate = new SessionShippingOptionShippingRateDataDeliveryEstimateOptions
                     {

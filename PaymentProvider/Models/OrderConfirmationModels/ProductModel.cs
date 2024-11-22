@@ -18,9 +18,6 @@ namespace PaymentProvider.Models.OrderConfirmationModels
         public string? Category { get; set; }
         public string? Size { get; set; }
         public string? Description { get; set; }
-
-        [Required]
-        [Range(1, 100_000)]
         public decimal? DiscountedPrice { get; set; }
         [MinLength(2, ErrorMessage = "ImageUrl must be atleast 2 characters.")]
         [Url]

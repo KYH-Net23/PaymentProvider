@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PaymentProvider.Entities;
 using PaymentProvider.Factories.Entities;
 using PaymentProvider.Models;
-using PaymentProvider.Models.OrderConfirmationModels;
 using PaymentProvider.Services;
 using Stripe.Checkout;
 
@@ -14,6 +12,7 @@ namespace PaymentProvider.Controllers
     {
         private readonly OrderService _orderService = orderService;
         private readonly StripeService _stripeCustomerService = stripeCustomerService;
+        private int orderEntityId = 0;
 
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] OrderModel orderDetails)
@@ -24,12 +23,14 @@ namespace PaymentProvider.Controllers
                 if (orderDetails == null) return NotFound();
                 var orderEntity = OrderEntityFactory.Create(orderDetails);
                 await _orderService.CreateOrderAsync(orderEntity);
+                orderEntityId = orderEntity.Id;
+                //var domain = $"{Request.Scheme}://{Request.Host}";
                 var domain = "http://localhost:5173";
                 var customer = _stripeCustomerService.CreateCustomer(orderDetails);
                 var options = new SessionCreateOptions
                 {
                     UiMode = "embedded",
-                    Currency = "sek",
+                    Currency = "usd",
                     LineItems = _orderService.GetOrderItemsList(orderDetails),
                     Mode = "payment",
                     ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
@@ -58,6 +59,7 @@ namespace PaymentProvider.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+                await _orderService.Delete(orderEntityId);
                 return BadRequest(ex.Message);
             }
         }
