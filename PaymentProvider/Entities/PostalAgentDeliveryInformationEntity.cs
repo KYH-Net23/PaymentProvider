@@ -30,5 +30,4 @@ public class PostalAgentDeliveryInformationEntity
 
     [RegularExpression(@"^\+46\d{9}$", ErrorMessage = "Phone number must start with +46 and be followed by exactly 9 digits.")]
     public string PhoneNumber { get; set; } = null!;
-
 }

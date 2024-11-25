@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PaymentProvider.Entities;
 using PaymentProvider.Factories;
-using PaymentProvider.Models;
 using PaymentProvider.Services;
 using Stripe;
 using Stripe.Checkout;
@@ -24,7 +22,6 @@ namespace PaymentProvider.Controllers
             {
                 var sessionService = new SessionService();
                 var session = sessionService.Get(session_id);
-
                 var sessionLineItemService = new SessionLineItemService();
                 var lineItems = sessionLineItemService.List(session_id);
 
@@ -46,30 +43,14 @@ namespace PaymentProvider.Controllers
                 session.PaymentIntent.PaymentMethod = paymentMethod;
 
                 var order = await _orderService.GetAsync(session_id);
-                if (order.Invoice == null)
-                {
-
-                    order.Invoice = new InvoiceEntity
-                    {
-                        City = session.Invoice.CustomerAddress.City ?? "",
-                        Country = session.Invoice.CustomerAddress.Country ?? "",
-                        FullName = session.Invoice.CustomerName ?? "",
-                        PaymentOption = session.PaymentIntent.PaymentMethod.Card.Brand ?? "",
-                        PostalCode = session.Invoice.CustomerAddress.PostalCode ?? "",
-                        StreetAddress = session.Invoice.CustomerAddress.Line1 ?? "",
-                        InvoiceUrl = session.Invoice.InvoicePdf ?? ""
-                    };
-                }
-                else
-                {
-                    order.Invoice.City = session.Invoice.CustomerAddress.City ?? "";
-                    order.Invoice.Country = session.Invoice.CustomerAddress.Country ?? "";
-                    order.Invoice.FullName = session.Invoice.CustomerName ?? "";
-                    order.Invoice.PaymentOption = session.PaymentIntent.PaymentMethod.Card.Brand ?? "";
-                    order.Invoice.PostalCode = session.Invoice.CustomerAddress.PostalCode ?? "";
-                    order.Invoice.StreetAddress = session.Invoice.CustomerAddress.Line1 ?? "";
-                    order.Invoice.InvoiceUrl = session.Invoice.InvoicePdf ?? "";
-                }
+                order.Invoice ??= new InvoiceEntity();
+                order.Invoice.City = session.Invoice.CustomerAddress.City ?? "";
+                order.Invoice.Country = session.Invoice.CustomerAddress.Country ?? "";
+                order.Invoice.FullName = session.Invoice.CustomerName ?? "";
+                order.Invoice.PaymentOption = session.PaymentIntent.PaymentMethod.Card.Brand ?? "";
+                order.Invoice.PostalCode = session.Invoice.CustomerAddress.PostalCode ?? "";
+                order.Invoice.StreetAddress = session.Invoice.CustomerAddress.Line1 ?? "";
+                order.Invoice.InvoiceUrl = session.Invoice.InvoicePdf ?? "";
 
                 session.LineItems = lineItems;
 
@@ -82,7 +63,7 @@ namespace PaymentProvider.Controllers
                         //var dbInvoice = new InvoiceRequest
                         //{
                         //    Amount = order.OrderTotal,
-                        //    CustomerId = order.Shipping.CustomerDeliveryInformation.Id,
+                        //    CustomerId = 0,
                         //    Date = DateTime.UtcNow,
                         //    DueDate = DateTime.UtcNow.AddDays(7),
                         //    OrderId = order.Id,
@@ -90,7 +71,7 @@ namespace PaymentProvider.Controllers
                         //    Status = "paid"
                         //};
                         //await _invoiceRequestService.CreateInvoiceAsync(dbInvoice);
-                        return Ok(new { session, orderConfirmation, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email });
+                        return Ok(new { session, orderConfirmation, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email, orderId = order.Id });
                     }
                     await _orderService.Delete(order);
                     return BadRequest();
@@ -99,8 +80,7 @@ namespace PaymentProvider.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return BadRequest();
+                return BadRequest(ex.Message);
             }
         }
     }

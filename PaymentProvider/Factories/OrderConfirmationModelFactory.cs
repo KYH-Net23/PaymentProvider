@@ -26,7 +26,7 @@ namespace PaymentProvider.Factories
                     Category = productModel.Category,
                     DiscountedPrice = productModel.DiscountedPrice,
                     ImageUrl = productModel.ImageUrl,
-                    Name = productModel.Name,
+                    Name = $"{productModel.Model} - {productModel.Brand}",
                     Description = productModel.Description,
                     Price = productModel.Price,
                     ProductId = productModel.ProductId,

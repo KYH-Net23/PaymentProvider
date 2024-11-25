@@ -10,7 +10,7 @@ namespace PaymentProvider.Services
 
         public async Task CreateInvoiceAsync(InvoiceRequest invoice)
         {
-            var apiUrl = "https://bankdbserver.database.windows.net/api/createinvoice";
+            var apiUrl = "https://bankdbserver.database.windows.net/createinvoice";
 
             var jsonPayload = JsonSerializer.Serialize(invoice);
 

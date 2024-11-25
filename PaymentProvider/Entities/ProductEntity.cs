@@ -10,8 +10,11 @@ namespace PaymentProvider.Entities
         public int ProductId { get; set; }
 
         [Required]
-        [MinLength(2, ErrorMessage = "Name must be atleast 2 characters.")]
-        public string Name { get; set; } = null!;
+        [MinLength(2, ErrorMessage = "Brand must be atleast 2 characters.")]
+        public string Brand { get; set; } = null!;
+        [Required]
+        [MinLength(2, ErrorMessage = "Model must be atleast 2 characters.")]
+        public string Model { get; set; } = null!;
 
         [Required]
         [Range(1, 10_000)]
@@ -20,11 +23,10 @@ namespace PaymentProvider.Entities
         public string? Description { get; set; }
 
         [Required]
-        [Range(1, 100_000)]
+        [Range(0, double.MaxValue, ErrorMessage = "Price cannot be lower than 0.")]
         public decimal Price { get; set; }
 
-        [Required]
-        [Range(1, 100_000)]
+        [Range(0, double.MaxValue, ErrorMessage = "Discounted Price cannot be lower than 0.")]
         public decimal? DiscountedPrice { get; set; }
 
         [Required]

@@ -10,14 +10,11 @@ namespace PaymentProvider.Entities
 
         [Required]
         public DateTime Date { get; set; }
-
         [Required]
-        [Range(1, 10_000_000)]
+        [Range(0, double.MaxValue, ErrorMessage = "OrderTotal cannot be lower than 0.")]
         public decimal OrderTotal { get; set; }
-
         [Required]
         public string ReceivingEmail { get; set; } = null!;
-
         [Required]
         public ShippingEntity Shipping { get; set; } = null!;
 

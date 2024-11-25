@@ -28,7 +28,8 @@ public static class OrderEntityFactory
                 Products = order.Products.Select(productModel => new ProductEntity
                 {
                     ProductId = productModel.ProductId,
-                    Name = productModel.Name,
+                    Model = productModel.Name.Split(" - ")[0],
+                    Brand = productModel.Name.Split(" - ")[1],
                     Amount = productModel.Amount,
                     Price = productModel.Price,
                     Description = productModel.Description,

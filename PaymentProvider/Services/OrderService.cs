@@ -16,6 +16,43 @@ namespace PaymentProvider.Services
         {
             try
             {
+                var existingShipping = await _context.ShippingDetails
+                    .FirstOrDefaultAsync(s => s.TrackingLink == order.Shipping.TrackingLink
+                    && s.OrderArrival == order.Shipping.OrderArrival
+                    && s.ShippingCost == order.Shipping.ShippingCost
+                    && s.CustomerDeliveryInformation == order.Shipping.CustomerDeliveryInformation
+                    && s.PostalAgentDeliveryInformation == order.Shipping.PostalAgentDeliveryInformation);
+                if (existingShipping != null)
+                {
+                    order.Shipping = existingShipping;
+                }
+                var existingCustomer = await _context.CustomerDeliveryInformation
+                    .FirstOrDefaultAsync(c => c.StreetAddress == order.Shipping.CustomerDeliveryInformation.StreetAddress
+                    && c.PostalCode == order.Shipping.CustomerDeliveryInformation.PostalCode
+                    && c.City == order.Shipping.CustomerDeliveryInformation.City
+                    && c.Country == order.Shipping.CustomerDeliveryInformation.Country
+                    && c.FullName == order.Shipping.CustomerDeliveryInformation.FullName
+                    && c.PhoneNumber == order.Shipping.CustomerDeliveryInformation.PhoneNumber);
+                if (existingCustomer != null)
+                {
+                    order.Shipping.CustomerDeliveryInformation = existingCustomer;
+                }
+
+                //var matchedProducts = new List<ProductEntity>();
+                //foreach (var product in order.Products)
+                //{
+                //    var matchingProduct = await _context.Products.
+                //        FirstOrDefaultAsync(p => p.ProductId == product.ProductId
+                //        && p.Amount == product.Amount
+                //        && p.Price == product.Price
+                //        && p.DiscountedPrice == product.DiscountedPrice
+                //        && p.Size == product.Size);
+                //    if (matchingProduct != null)
+                //    {
+                //        matchedProducts.Add(matchingProduct);
+                //    }
+                //}
+                //order.Products = matchedProducts;
                 await _context.Orders.AddAsync(order);
                 await _context.SaveChangesAsync();
             }

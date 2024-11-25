@@ -9,7 +9,7 @@ public static class ProductEntityFactory
         return new ProductEntity
         {
             ProductId = productId,
-            Name = name,
+            //Name = name,
             Amount = amount,
             Description = description,
             Price = price,
