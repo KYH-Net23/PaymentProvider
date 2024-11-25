@@ -11,10 +11,11 @@ namespace PaymentProvider.Controllers
 {
     [Route("session-status")]
     [ApiController]
-    public class SessionStatusController(EmailService emailService, OrderService orderService) : ControllerBase
+    public class SessionStatusController(EmailService emailService, OrderService orderService, InvoiceRequestService invoiceRequestService) : ControllerBase
     {
         private readonly EmailService _emailService = emailService;
         private readonly OrderService _orderService = orderService;
+        private readonly InvoiceRequestService _invoiceRequestService = invoiceRequestService;
 
         [HttpGet]
         public async Task<ActionResult> SessionStatus([FromQuery] string session_id)
@@ -45,17 +46,30 @@ namespace PaymentProvider.Controllers
                 session.PaymentIntent.PaymentMethod = paymentMethod;
 
                 var order = await _orderService.GetAsync(session_id);
-
-                order.Invoice = new InvoiceEntity
+                if (order.Invoice == null)
                 {
-                    City = session.Invoice.CustomerAddress.City ?? "",
-                    Country = session.Invoice.CustomerAddress.Country ?? "",
-                    FullName = session.Invoice.CustomerName ?? "",
-                    PaymentOption = session.PaymentIntent.PaymentMethod.Card.Brand ?? "",
-                    PostalCode = session.Invoice.CustomerAddress.PostalCode ?? "",
-                    StreetAddress = session.Invoice.CustomerAddress.Line1 ?? "",
-                    InvoiceUrl = session.Invoice.InvoicePdf ?? ""
-                };
+
+                    order.Invoice = new InvoiceEntity
+                    {
+                        City = session.Invoice.CustomerAddress.City ?? "",
+                        Country = session.Invoice.CustomerAddress.Country ?? "",
+                        FullName = session.Invoice.CustomerName ?? "",
+                        PaymentOption = session.PaymentIntent.PaymentMethod.Card.Brand ?? "",
+                        PostalCode = session.Invoice.CustomerAddress.PostalCode ?? "",
+                        StreetAddress = session.Invoice.CustomerAddress.Line1 ?? "",
+                        InvoiceUrl = session.Invoice.InvoicePdf ?? ""
+                    };
+                }
+                else
+                {
+                    order.Invoice.City = session.Invoice.CustomerAddress.City ?? "";
+                    order.Invoice.Country = session.Invoice.CustomerAddress.Country ?? "";
+                    order.Invoice.FullName = session.Invoice.CustomerName ?? "";
+                    order.Invoice.PaymentOption = session.PaymentIntent.PaymentMethod.Card.Brand ?? "";
+                    order.Invoice.PostalCode = session.Invoice.CustomerAddress.PostalCode ?? "";
+                    order.Invoice.StreetAddress = session.Invoice.CustomerAddress.Line1 ?? "";
+                    order.Invoice.InvoiceUrl = session.Invoice.InvoicePdf ?? "";
+                }
 
                 session.LineItems = lineItems;
 
@@ -65,9 +79,20 @@ namespace PaymentProvider.Controllers
                     if (await _emailService.SendEmailInformationAsync(orderConfirmation))
                     {
                         await _orderService.SaveChangesAsync();
+                        //var dbInvoice = new InvoiceRequest
+                        //{
+                        //    Amount = order.OrderTotal,
+                        //    CustomerId = order.Shipping.CustomerDeliveryInformation.Id,
+                        //    Date = DateTime.UtcNow,
+                        //    DueDate = DateTime.UtcNow.AddDays(7),
+                        //    OrderId = order.Id,
+                        //    PaidDate = DateTime.UtcNow,
+                        //    Status = "paid"
+                        //};
+                        //await _invoiceRequestService.CreateInvoiceAsync(dbInvoice);
                         return Ok(new { session, orderConfirmation, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email });
                     }
-                    _orderService.Delete(order);
+                    await _orderService.Delete(order);
                     return BadRequest();
                 }
                 return BadRequest(new { status = session.Status });

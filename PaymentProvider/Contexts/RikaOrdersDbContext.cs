@@ -9,6 +9,7 @@ namespace PaymentProvider.Contexts
         public DbSet<OrderEntity> Orders { get; set; }
         public DbSet<ProductEntity> Products { get; set; }
         public DbSet<ShippingEntity> ShippingDetails { get; set; }
+        public DbSet<ReturnEntity> Returns { get; set; }
         public DbSet<CustomerDeliveryInformationEntity> CustomerDeliveryInformation { get; set; }
         public DbSet<PostalAgentDeliveryInformationEntity> PostalAgentDeliveryInformation { get; set; }
     }

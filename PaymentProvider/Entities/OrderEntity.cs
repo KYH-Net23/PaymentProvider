@@ -28,5 +28,6 @@ namespace PaymentProvider.Entities
         public List<ProductEntity> Products { get; set; } = null!;
 
         public string? SessionId { get; set; }
+        public ReturnEntity? Return { get; set; }
     }
 }
