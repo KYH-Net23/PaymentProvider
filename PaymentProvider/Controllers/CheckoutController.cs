@@ -12,7 +12,7 @@ namespace PaymentProvider.Controllers
     {
         private readonly OrderService _orderService = orderService;
         private readonly StripeService _stripeCustomerService = stripeCustomerService;
-        private int orderEntityId = 0;
+        private int _orderEntityId = 0;
 
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] OrderModel orderDetails)
@@ -23,7 +23,7 @@ namespace PaymentProvider.Controllers
                 if (orderDetails == null) return NotFound();
                 var orderEntity = OrderEntityFactory.Create(orderDetails);
                 await _orderService.CreateOrderAsync(orderEntity);
-                orderEntityId = orderEntity.Id;
+                _orderEntityId = orderEntity.Id;
                 //var domain = $"{Request.Scheme}://{Request.Host}";
                 var domain = "http://localhost:5173";
                 var customer = _stripeCustomerService.CreateCustomer(orderDetails);
@@ -33,7 +33,8 @@ namespace PaymentProvider.Controllers
                     Currency = "usd",
                     LineItems = _orderService.GetOrderItemsList(orderDetails),
                     Mode = "payment",
-                    ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
+                    //ReturnUrl = domain + "/return?session_id={CHECKOUT_SESSION_ID}",
+                    ReturnUrl = domain + "/orderconfirmation",
                     Customer = customer.Id,
                     ShippingOptions =
                     [
@@ -54,12 +55,12 @@ namespace PaymentProvider.Controllers
                 session.Customer = customer;
                 orderEntity.SessionId = session.Id;
                 await _orderService.SaveChangesAsync();
-                return Ok(new { sessionId = session.Id, clientSecret = session.ClientSecret });
+                return Ok(new { sessionId = session.Id, clientSecret = session.ClientSecret, orderId = _orderEntityId });
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                await _orderService.Delete(orderEntityId);
+                await _orderService.Delete(_orderEntityId);
                 return BadRequest(ex.Message);
             }
         }
