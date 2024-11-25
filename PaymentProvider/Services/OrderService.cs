@@ -53,6 +53,7 @@ namespace PaymentProvider.Services
                 if (order == null) return null!;
                 order = await _context.Orders
                     .Include(o => o.Products)
+                    .Include(o => o.Invoice)
                     .Include(o => o.Shipping)
                     .ThenInclude(s => s.CustomerDeliveryInformation)
                     .Include(o => o.Shipping)
@@ -72,6 +73,7 @@ namespace PaymentProvider.Services
                 if (order == null) return null!;
                 order = await _context.Orders
                     .Include(o => o.Products)
+                    .Include(o => o.Invoice)
                     .Include(o => o.Shipping)
                     .ThenInclude(s => s.CustomerDeliveryInformation)
                     .Include(o => o.Shipping)
