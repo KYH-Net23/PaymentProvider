@@ -41,6 +41,7 @@ public static class OrderEntityFactory
                 OrderTotal = order.OrderTotal,
                 ReceivingEmail = order.ReceivingEmail,
                 Date = order.Date,
+                Status = "processing",
                 Invoice = new InvoiceEntity
                 {
                     City = "",

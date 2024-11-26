@@ -26,5 +26,7 @@ namespace PaymentProvider.Entities
 
         public string? SessionId { get; set; }
         public ReturnEntity? Return { get; set; }
+        public bool EmailSent { get; set; } = false;
+        public string Status { get; set; } = null!;
     }
 }

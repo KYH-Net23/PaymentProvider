@@ -24,6 +24,7 @@ namespace PaymentProvider.Services
                 if (existingOrder != null && existingOrder != order)
                 {
                     existingOrder.Date = DateTime.UtcNow;
+                    if (string.IsNullOrEmpty(existingOrder.Status)) existingOrder.Status = "processing";
                     await _context.SaveChangesAsync();
                     return existingOrder;
                 }
@@ -92,6 +93,9 @@ namespace PaymentProvider.Services
         public bool AreOrdersEqual(OrderEntity order1, OrderEntity order2)
         {
             if (order1 == null || order2 == null) return false;
+
+            // status comparison
+            if (order1.Status != order2.Status && order1.Status != "" && order2.Status != "") return false;
 
             //if (obj1.Invoice.PostalCode != obj2.Invoice.PostalCode 
             //    || obj1.Invoice.FullName != obj2.Invoice.FullName

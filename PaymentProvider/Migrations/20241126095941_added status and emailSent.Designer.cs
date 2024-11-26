@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PaymentProvider.Contexts;
 
@@ -11,9 +12,11 @@ using PaymentProvider.Contexts;
 namespace PaymentProvider.Migrations
 {
     [DbContext(typeof(RikaOrdersDbContext))]
-    partial class RikaOrdersDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241126095941_added status and emailSent")]
+    partial class addedstatusandemailSent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

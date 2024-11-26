@@ -54,29 +54,30 @@ namespace PaymentProvider.Controllers
 
                 session.LineItems = lineItems;
 
-                if (session.PaymentStatus == "paid")
+                if (session.PaymentStatus == "paid" && order.Status != "paid")
                 {
                     var orderConfirmation = OrderConfirmationModelFactory.Create(order);
-                    if (await _emailService.SendEmailInformationAsync(orderConfirmation))
-                    {
-                        await _orderService.SaveChangesAsync();
-                        //var dbInvoice = new InvoiceRequest
-                        //{
-                        //    Amount = order.OrderTotal,
-                        //    CustomerId = 0,
-                        //    Date = DateTime.UtcNow,
-                        //    DueDate = DateTime.UtcNow.AddDays(7),
-                        //    OrderId = order.Id,
-                        //    PaidDate = DateTime.UtcNow,
-                        //    Status = "paid"
-                        //};
-                        //await _invoiceRequestService.CreateInvoiceAsync(dbInvoice);
-                        return Ok(new { session, orderConfirmation, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email, orderId = order.Id });
-                    }
-                    await _orderService.Delete(order);
-                    return BadRequest();
+                    order.EmailSent = await _emailService.SendEmailInformationAsync(orderConfirmation);
+                    //var dbInvoice = new InvoiceRequest
+                    //{
+                    //    Amount = order.OrderTotal,
+                    //    CustomerId = 0,
+                    //    Date = DateTime.UtcNow,
+                    //    DueDate = DateTime.UtcNow.AddDays(7),
+                    //    OrderId = order.Id,
+                    //    PaidDate = DateTime.UtcNow,
+                    //    Status = "paid"
+                    //};
+                    //await _invoiceRequestService.CreateInvoiceAsync(dbInvoice);
+                    order.Status = "paid";
+                    await _orderService.SaveChangesAsync();
+                    return Ok(new { session, orderConfirmation, status = session.Status, customer_email = session.CustomerEmail ?? session.Customer.Email, orderId = order.Id });
                 }
-                return BadRequest(new { status = session.Status });
+                if (!order.EmailSent)
+                {
+                    await _orderService.Delete(order);
+                }
+                return BadRequest(new { status = session.Status, message = "something went wrong", emailSent = order.EmailSent });
             }
             catch (Exception ex)
             {
